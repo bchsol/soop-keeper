@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>SOOP VOD Archive - 소멸 예정 관리</title>
+    <link rel="icon" href="https://res.sooplive.com/favicon.ico" />
+    <link rel="stylesheet" as="style" crossorigin
+        href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" />
+    <link rel="stylesheet" href="./styles.css?v=20260531_v3" />
+    <style>
+        .notice-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 999999;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .notice-modal-overlay.show {
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .notice-modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #1f2937;
+            background: #1f2937;
+            display: flex;
+            align-items: center;
+        }
+
+        .modal-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .modal-body {
+            padding: 24px;
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .modal-body .highlight {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .modal-body .danger {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .notice-list {
+            margin: 16px 0;
+            padding-left: 20px;
+        }
+
+        .notice-list li {
+            margin-bottom: 10px;
+        }
+
+        .notice-ref {
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 8px;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .notice-ref a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .notice-ref a:hover {
+            text-decoration: underline;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #1f2937;
+            background: #111827;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            accent-color: #3b82f6;
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .btn-close-modal {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-close-modal:hover {
+            background: #2563eb;
+        }
+
+        /* 긴급 공지 팝업 스타일 */
+        .emergency-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000000;
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .emergency-modal-overlay.show {
+            opacity: 1;
+        }
+
+        .emergency-modal-content {
+            background: #111827;
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(245, 158, 11, 0.05);
+            transform: translateY(30px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            color: #f8fafc;
+        }
+
+        .emergency-modal-overlay.show .emergency-modal-content {
+            transform: translateY(0);
+        }
+
+        .emergency-header {
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #d97706, #92400e);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .emergency-title {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.5px;
+        }
+
+        .emergency-body {
+            padding: 26px 24px;
+            font-size: 14.5px;
+            line-height: 1.6;
+        }
+
+        .emergency-body p {
+            margin-top: 0;
+            margin-bottom: 14px;
+        }
+
+        .emergency-body ul {
+            margin: 14px 0;
+            padding-left: 20px;
+        }
+
+        .emergency-body li {
+            margin-bottom: 10px;
+        }
+
+        .emergency-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            background: #0f172a;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-emergency-close {
+            background: #d97706;
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);
+            width: 100%;
+        }
+
+        .btn-emergency-close:hover {
+            background: #b45309;
+            box-shadow: 0 4px 16px rgba(217, 119, 6, 0.35);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="emergencyModal" class="emergency-modal-overlay" style="display: none;">
+        <div class="emergency-modal-content">
+            <div class="emergency-header" style="background: linear-gradient(135deg, #ef4444, #b91c1c);">
+                <span style="font-size: 22px;">📢</span>
+                <h2 class="emergency-title">서비스 종료 안내</h2>
+            </div>
+            <div class="emergency-body" style="padding: 24px;">
+                <p
+                    style="font-weight: 700; font-size: 18px; color: #fca5a5; border-bottom: 1px dashed rgba(239, 68, 68, 0.2); padding-bottom: 10px; margin-bottom: 16px;">
+                    🚨 SoopKeeper 서비스 운영 종료 예정
+                </p>
+                <p style="margin-bottom: 16px; font-size: 14.5px; line-height: 1.6; color: #e2e8f0;">
+                    그동안 소중한 다시보기를 살리시느라 고생많으셨습니다.<br>
+                    6월1일 오전10시 기준 정책변경이 적용되어 별풍선으로 영구보관을 할 수 없게 되었습니다.<br>
+                    (정확하진 않으나 오전10시 기준으로 소멸된 영상을 표시했습니다.)<br>
+                    본 VOD 소멸예정 정리 서비스는 <strong>6월 3일(수)</strong>까지 운영 후 종료될 예정입니다.
+                </p>
+
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px; margin-bottom: 18px;">
+                    <div
+                        style="font-weight: 700; font-size: 13.5px; color: #94a3b8; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        📊 서비스 통계 (추정)
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+                        <div
+                            style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+                            <span style="color: #94a3b8;">총 지원 스트리머 수</span>
+                            <span style="font-weight: 700; color: #f8fafc;">1,158명</span>
+                        </div>
+                        <div
+                            style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 6px;">
+                            <span style="color: #94a3b8;">별풍선으로 살려낸 VOD 수</span>
+                            <span style="font-weight: 700; color: #10b981;">313,313개</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding-bottom: 2px;">
+                            <span style="color: #94a3b8;">소멸될 VOD 수</span>
+                            <span style="font-weight: 700; color: #ef4444;">348,970개</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="font-size: 15px; color: #94a3b8; line-height: 1.6;">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 6px;">서비스 종료일까지는 현재 등록된 스트리머의 데이터가 계속 수집 및 유지됩니다.</li>
+                        <li style="margin-bottom: 6px; color: #fca5a5;">신규 스트리머 신청은 더 이상 받지 않겠습니다.</li>
+                        <li>짧은 기간 동안 부족한 서비스였지만 유용하게 사용해 주셔서 감사하고,
+                            <br>또한 별풍선과 퀵뷰를 주신 분들께 정말 감사드립니다.
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+            <div class="emergency-footer" style="background: #0b0f19; flex-direction: column; gap: 10px;">
+                <a href="https://sotong.sooplive.com/?board_type=servicenotice&work=view&b_no=9777&page=1&check_title=&check_content="
+                    target="_blank" rel="noopener noreferrer"
+                    style="display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.3); color: #60a5fa; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s;"
+                    onmouseover="this.style.background='rgba(59,130,246,0.25)'"
+                    onmouseout="this.style.background='rgba(59,130,246,0.15)'">📋 SOOP 소통센터 공지 보기</a>
+                <button id="closeEmergencyBtn" class="btn-emergency-close"
+                    style="background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);">확인했습니다 (닫기)</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 긴급 공지 팝업 (무조건 노출) -->
+    <!-- <div id="emergencyModal" class="emergency-modal-overlay" style="display: none;">
+        <div class="emergency-modal-content">
+            <div class="emergency-header" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                <span style="font-size: 22px;">📢</span>
+                <h2 class="emergency-title">영구보관 정책 적용 지연 안내</h2>
+            </div>
+            <div class="emergency-body" style="padding: 24px;">
+                <p
+                    style="font-weight: 700; font-size: 18px; color: #fef08a; border-bottom: 1px dashed rgba(245, 158, 11, 0.2); padding-bottom: 10px; margin-bottom: 16px;">
+                    ⚠️ 자정이 지났음에도 영구보관 가능 확인
+                </p>
+                <p
+                    style="margin-bottom: 16px; font-size: 14.5px; line-height: 1.6; color: #e2e8f0; word-break: keep-all;">
+                    6월 1일 자정이 지난 현재 시점에도 **별풍선/애드벌룬 10개 후원**을 통한 VOD 영구보관 처리가 여전히 작동하고 있는 것을 확인하였습니다.
+                </p>
+                <p
+                    style="margin-bottom: 16px; font-size: 14.5px; line-height: 1.6; color: #e2e8f0; word-break: keep-all;">
+                    SOOP 측에서 정확히 몇 시에 실제 시스템 정책을 일괄 적용할지는 파악하기 어려우나, **실제 시스템이 변경되어 차단되기 전까지는 기존처럼 영구보관이 계속 가능할 것**으로
+                    보입니다.
+                </p>
+
+                <div
+                    style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px; margin-bottom: 18px; font-size: 13.5px; color: #94a3b8; line-height: 1.6;">
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li style="margin-bottom: 6px; color: #fef08a; font-weight: 600;">실시간으로 살리기 작업을 하시는 분들은 정책이 완전히
+                            막히기 전까지 서둘러 진행해 보시기 바랍니다.</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <a href="https://www.sooplive.com/station/cksthf01/post/196972385" target="_blank"
+                        style="display: inline-block; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #fef08a; text-decoration: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; font-size: 14px; transition: all 0.2s;">
+                        📝 개발자 게시판 공지사항 확인하기
+                    </a>
+                </div>
+            </div>
+            <div class="emergency-footer" style="background: #0b0f19;">
+                <button id="closeEmergencyBtn" class="btn-emergency-close"
+                    style="background: #d97706; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.2);">확인했습니다 (닫기)</button>
+            </div>
+        </div>
+    </div> -->
+
+    <div class="mobile-topbar" id="mobileTopbar">
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://res.sooplive.com/favicon.ico" alt="Logo"
+                style="width: 24px; height: 24px; border-radius: 4px;">
+            <span style="font-size: 16px; font-weight: 700;">VOD Archive</span>
+        </div>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="window.toggleMobileSidebar()">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="window.toggleMobileSidebar()"></div>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="https://res.sooplive.com/favicon.ico" alt="Logo"
+                style="width: 28px; height: 28px; border-radius: 6px;">
+            <h1>VOD Archive</h1>
+        </div>
+        <div
+            style="padding: 20px 24px 4px; font-size: 13px; font-weight: 600; color: var(--text-dim); letter-spacing: -0.3px;">
+            스트리머 목록</div>
+        <div style="padding: 8px 12px 0;">
+            <input type="text" id="streamerSearch" placeholder="스트리머 검색..."
+                style="width: 100%; padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-size: 14px; outline: none; margin-bottom: 8px;">
+            <select id="streamerSort" onchange="renderStreamers()"
+                style="width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-dim); font-size: 13px; outline: none; cursor: pointer;">
+                <option value="default">기본순</option>
+                <option value="nameAsc">이름 오름차순 (ㄱ-ㅎ)</option>
+                <option value="nameDesc">이름 내림차순 (ㅎ-ㄱ)</option>
+            </select>
+        </div>
+        <div class="streamer-list" id="streamerList">
+            <div style="text-align:center; padding: 30px 20px; color: var(--text-dim); font-size: 14px;">
+                데이터를 불러오는 중...
+            </div>
+        </div>
+        <div style="padding: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <!-- <button id="requestBtn" class="action-btn" style="margin-top: 0;">스트리머 신청</button> -->
+            <button id="contactBtn" class="action-btn"
+                style="margin-top: 0; background: rgba(255, 255, 255, 0.05); border-color: var(--border-color); color: var(--text-main);">문의하기</button>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-notice" id="topNotice" onmouseenter="pauseNotice()" onmouseleave="resumeNotice()">
+            <span class="notice-badge">안내</span>
+            <div class="notice-slider-wrapper">
+                <ul class="notice-slider" id="noticeSlider">
+                    <li style="color: #fef08a; font-weight: 700;">⚠️ 모든 답변은 개발자 게시판에 있습니다.</li>
+                    <li>이 사이트는 SOOP 공식이 아니며 스트리머와 팬분들의 편의를 위해 개발한 사이트입니다.</li>
+                    <li>방송 카테고리가 스포츠 (아시안게임)일 경우 VOD가 수집되지 않는 점 양해 부탁드립니다.</li>
+                </ul>
+            </div>
+            <div class="notice-controls">
+                <span class="notice-counter" id="noticeCounter">1 / 3</span>
+                <button class="notice-nav" onclick="prevNotice()">❮</button>
+                <button class="notice-nav" onclick="nextNotice()">❯</button>
+                <button class="notice-close"
+                    onclick="document.getElementById('topNotice').style.display='none'">✕</button>
+            </div>
+        </div>
+        <div class="main-header" id="mainHeader">
+            <div
+                style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <h2 id="headerTitle">스트리머를 선택해주세요</h2>
+                        <div class="header-stats" id="headerStats">좌측 목록에서 스트리머를 선택하여 소멸 예정 VOD를 확인하세요.</div>
+                    </div>
+                    <div id="tabsWithDatePickerContainer"
+                        style="display: none; align-items: center; gap: 16px; flex-wrap: wrap;">
+                        <div class="tabs-container" id="tabsContainer" style="align-self: flex-start;">
+                            <button class="tab-btn active" id="tabEndangered" onclick="switchTab('endangered')">소멸
+                                예정</button>
+                            <button class="tab-btn" id="tabDeleted" onclick="switchTab('deleted')">소멸</button>
+                            <button class="tab-btn" id="tabSafe" onclick="switchTab('safe')">영구 보관</button>
+                            <button class="tab-btn" id="tabSupporter" onclick="switchTab('supporter')">후원 통계</button>
+                        </div>
+                        <!-- VOD 제목 검색 영역 (소멸예정 탭에서 노출) -->
+                        <div id="vodSearchArea" style="display: none; align-items: center; gap: 8px;">
+                            <input type="text" id="vodSearchInput" placeholder="VOD 제목 검색..."
+                                oninput="window.onVodSearchInput()"
+                                style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 14px; outline: none; width: 180px;">
+                            <select id="vodSortSelect" onchange="window.onVodSortChange()"
+                                style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; font-family: inherit;">
+                                <option value="oldest" style="background: var(--bg-surface); color: var(--text-main);">
+                                    정렬: 소멸 임박순</option>
+                                <option value="newest" style="background: var(--bg-surface); color: var(--text-main);">
+                                    정렬: 최신 등록순</option>
+                            </select>
+                        </div>
+                        <!-- 영구보관 조건 필터 영역 (영구보관 탭에서 노출) -->
+                        <div id="safeFilterArea" style="display: none; align-items: center; gap: 8px;">
+                            <select id="safeFilterSelect" onchange="window.onSafeFilterChange()"
+                                style="padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); font-size: 14px; outline: none; cursor: pointer; font-family: inherit;">
+                                <option value="all" style="background: var(--bg-surface); color: var(--text-main);">보관
+                                    조건: 전체</option>
+                                <option value="balloons"
+                                    style="background: var(--bg-surface); color: var(--text-main);">별풍선 충족 (10개↑)
+                                </option>
+                                <option value="views" style="background: var(--bg-surface); color: var(--text-main);">
+                                    조회수 충족 (1,001회↑)</option>
+                                <option value="both" style="background: var(--bg-surface); color: var(--text-main);">
+                                    별풍선+조회수 충족</option>
+                                <option value="unapplied"
+                                    style="background: var(--bg-surface); color: var(--text-main);">미적용 (오류)</option>
+                            </select>
+                        </div>
+                        <div id="shortVodFilterArea" style="display: none; align-items: center; gap: 8px;">
+                            <label
+                                style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-dim); cursor: pointer; user-select: none; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); transition: background 0.2s;">
+                                <input type="checkbox" id="hideShortVods" onchange="window.toggleHideShortVods()"
+                                    style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                                <span><input type="number" id="shortVodMinutes" value="10" min="1" max="120"
+                                        onchange="window.onShortVodMinutesChange()"
+                                        style="width: 42px; padding: 2px 4px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-size: 14px; text-align: center; -moz-appearance: textfield;">분
+                                    미만 영상 숨기기</span>
+                            </label>
+                            <label
+                                style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-dim); cursor: pointer; user-select: none; padding: 8px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); transition: background 0.2s;">
+                                <input type="checkbox" id="hidePlusVods" onchange="window.toggleHidePlusVods()"
+                                    style="accent-color: var(--accent-primary); width: 16px; height: 16px; cursor: pointer; margin: 0;">
+                                <span>구플 영상 숨기기</span>
+                            </label>
+                        </div>
+                        <div id="supporterDatePickerArea" style="display: none; align-items: center; gap: 10px;">
+                            <div class="datepicker-container" id="datepicker-container">
+                                <div class="custom-datepicker" onclick="window.toggleDatePickerPopup(event)">
+                                    <span class="selected-date-text" id="selected-date-text">날짜를 선택해 주세요.</span>
+                                    <span class="calendar-icon">📅</span>
+                                </div>
+                                <div class="datepicker-popup" id="datepicker-popup" style="display: none;"
+                                    onclick="event.stopPropagation()">
+                                    <div class="datepicker-header">
+                                        <button class="datepicker-nav-btn"
+                                            onclick="window.changeDatePickerMonth(-1)">◀</button>
+                                        <div class="datepicker-selectors">
+                                            <select id="datepicker-year-select"
+                                                onchange="window.updateDatePickerGrid()"></select>
+                                            <select id="datepicker-month-select"
+                                                onchange="window.updateDatePickerGrid()"></select>
+                                        </div>
+                                        <button class="datepicker-nav-btn"
+                                            onclick="window.changeDatePickerMonth(1)">▶</button>
+                                    </div>
+                                    <div class="datepicker-weeks">
+                                        <div>일</div>
+                                        <div>월</div>
+                                        <div>화</div>
+                                        <div>수</div>
+                                        <div>목</div>
+                                        <div>금</div>
+                                        <div>토</div>
+                                    </div>
+                                    <div class="datepicker-grid" id="datepicker-grid"></div>
+                                    <div class="datepicker-footer">
+                                        <button class="datepicker-apply-btn"
+                                            onclick="window.applyDatePickerDate()">적용</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button onclick="window.clearSupporterDateFilter()"
+                                style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: rgba(255,255,255,0.05); color: var(--text-main); font-size: 14px; cursor: pointer; transition: background 0.2s;">초기화</button>
+                            <a id="googleSheetLink" href="#" target="_blank"
+                                style="display: none; padding: 10px 16px; border-radius: 10px; border: 1px solid var(--success-green); background: rgba(39, 174, 96, 0.1); color: var(--success-green); font-size: 14px; text-decoration: none; font-weight: 600; align-items: center; gap: 6px; transition: background 0.2s;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
+                                    style="margin-bottom:-3px;">
+                                    <path
+                                        d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
+                                </svg> 구글 시트 열기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-controls"
+                    style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+                    <div
+                        style="font-size: 13px; color: var(--text-dim); background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 20px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border-color); white-space: nowrap;">
+                        <span
+                            style="display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--success-green); box-shadow: 0 0 8px var(--success-green);"></span>
+                        (지연중) 10분이내 자동 갱신됨
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="vod-grid" id="vodGrid">
+        </div>
+    </div>
+
+    <div id="requestModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">스트리머 신청</h3>
+            <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px; line-height: 1.5;">추가하고 싶은 스트리머의
+                SOOP 아이디나 닉네임을 입력해주세요.<br>(되도록 아이디를 입력해주세요)<br>관리자 확인 후 반영됩니다.<br><strong
+                    style="color: var(--danger-red); margin-top: 4px; font-size: 18px;">※ 파트너 스트리머는 모든 영상이 "영구보관"이므로
+                    신청하지 말아주세요.</strong>
+            </p>
+            <input type="text" id="requestInput" placeholder="예: eldk22 또는 하디아"
+                style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-size: 15px; margin-bottom: 12px; outline: none;">
+            <input type="text" id="requestReason" placeholder="신청 사유 (선택)"
+                style="width: 100%; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-size: 15px; margin-bottom: 20px; outline: none;">
+            <div style="display: flex; gap: 10px;">
+                <button id="requestCancel" class="action-btn" style="flex:1; background: transparent;">취소</button>
+                <button id="requestSubmit" class="action-btn"
+                    style="flex:1; background: var(--accent-primary); border-color: var(--accent-primary);">신청하기</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal-overlay" style="display: none;">
+        <div class="modal-box">
+            <h3 style="margin-bottom: 16px; font-size: 18px; font-weight: 700;">문의하기</h3>
+            <p style="color: var(--text-dim); font-size: 14px; margin-bottom: 20px; line-height: 1.5;">요청사항이나 질문사항을
+                작성해주세요.<br> 영상에 오류가 있을 경우 링크도 함께 주시면 감사하겠습니다.</p>
+            <textarea id="contactContent" placeholder="여기에 문의할 내용을 상세히 적어주세요..."
+                style="width: 100%; height: 120px; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-base); color: var(--text-main); font-size: 15px; margin-bottom: 20px; outline: none; resize: none; font-family: inherit; line-height: 1.5;"></textarea>
+            <div style="display: flex; gap: 10px;">
+                <button id="contactCancel" class="action-btn" style="flex:1; background: transparent;">취소</button>
+                <button id="contactSubmit" class="action-btn"
+                    style="flex:1; background: var(--accent-primary); border-color: var(--accent-primary);">보내기</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./app.js?v=20260601_v5"></script>
+</body>
+
+</html>

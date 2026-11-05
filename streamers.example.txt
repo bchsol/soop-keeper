@@ -1,0 +1,2 @@
+# One SOOP streamer ID per line
+example_streamer_id

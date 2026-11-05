@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+google-key*.json
+serviceAccountKey.json
+SecretKey/
+
+# Crawled data and runtime state
+data/
+data_snapshot/
+data_downloaded/
+R2BUCKET/
+streamers.txt
+streamers_delete.txt
+cache.json
+cache.json.tmp
+summary*.json
+deletion_report.json
+anomalies.json
+sheet-meta.json
+
+# Logs
+logs/
+*.log
+pm2-logs.txt
+crawler-log.txt
+.pm2/
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

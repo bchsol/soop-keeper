@@ -1,0 +1,1030 @@
+:root {
+    --bg-base: #0f1115;
+    --bg-surface: #1a1d24;
+    --bg-sidebar: #14161b;
+    --accent-primary: #3b82f6;
+    --accent-hover: #2563eb;
+    --accent-glow: rgba(59, 130, 246, 0.5);
+    --danger-red: #ef4444;
+    --danger-glow: rgba(239, 68, 68, 0.4);
+    --warning-orange: #f59e0b;
+    --success-green: #10b981;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.08);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Pretendard Variable', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-main);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------------- 사이드바 (스트리머 목록) ---------------- */
+.sidebar {
+    width: 300px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+}
+
+.sidebar-header {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-header .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.sidebar-header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(to right, #ffffff, #cbd5e1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.streamer-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 12px;
+}
+
+/* 커스텀 스크롤바 */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+.streamer-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 8px;
+    border: 1px solid transparent;
+}
+
+.streamer-item:hover {
+    background-color: var(--bg-surface);
+}
+
+.streamer-item.active {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.05);
+}
+
+.streamer-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    margin-right: 14px;
+    object-fit: cover;
+    border: 2px solid transparent;
+    background-color: #333;
+}
+
+.streamer-item.active .streamer-img {
+    border-color: var(--accent-primary);
+}
+
+.streamer-info {
+    flex: 1;
+}
+
+.streamer-info .name {
+    font-weight: 600;
+    font-size: 15px;
+    margin-bottom: 4px;
+    display: block;
+}
+
+.streamer-info .count {
+    font-size: 12px;
+    color: var(--danger-red);
+    background: rgba(239, 68, 68, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    font-weight: 500;
+}
+
+/* ---------------- 메인 콘텐츠 ---------------- */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* ---------------- 상단 공지 ---------------- */
+.top-notice {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+    border-bottom: 1px solid var(--border-color);
+    padding: 14px 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+    position: relative;
+    z-index: 11;
+}
+
+.notice-badge {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.notice-slider-wrapper {
+    flex: 1;
+    height: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.notice-slider {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.notice-slider li {
+    height: 20px;
+    line-height: 20px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: default;
+}
+
+.notice-slider li strong {
+    color: #fff;
+    font-weight: 700;
+}
+
+.notice-controls {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+}
+
+.notice-counter {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    background: rgba(0,0,0,0.3);
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-right: 6px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.notice-nav {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    font-size: 10px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.notice-nav:hover {
+    color: #fff;
+}
+
+.notice-close {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    margin-left: 6px;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notice-close:hover {
+    color: #fff;
+}
+
+/* Glassmorphism 헤더 */
+.main-header {
+    padding: 30px 40px;
+    background: rgba(15, 17, 21, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.main-header h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+}
+
+.header-stats {
+    color: var(--text-dim);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* ---------------- 탭 ---------------- */
+.tabs-container {
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tab-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+.vod-grid {
+    padding: 30px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 28px;
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------------- VOD 카드 ---------------- */
+.vod-card {
+    background-color: var(--bg-surface);
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.vod-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+.thumb-area {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    overflow: hidden;
+}
+
+.thumb-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vod-card:hover .thumb-area img {
+    transform: scale(1.05);
+}
+
+.thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+}
+
+.d-day-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+}
+
+/* 동적 배지 스타일 */
+.badge-critical {
+    background: var(--danger-red);
+    color: #fff;
+    animation: pulse 2s infinite;
+}
+
+.badge-warning {
+    background: var(--warning-orange);
+    color: #000;
+}
+
+.badge-safe {
+    background: var(--accent-primary);
+    color: #fff;
+}
+
+.badge-balloons {
+    background: var(--warning-orange);
+    color: #000;
+}
+
+.badge-views {
+    background: var(--success-green);
+    color: #fff;
+}
+
+.badge-unapplied {
+    background: #64748b;
+    color: #fff;
+}
+
+.badge-deleted {
+    background: #475569;
+    color: #cbd5e1;
+}
+
+.badge-both {
+    background: linear-gradient(135deg, var(--warning-orange) 0%, var(--success-green) 100%);
+    color: #000;
+}
+
+#safeFilterSelect option {
+    background-color: var(--bg-surface) !important;
+    color: var(--text-main) !important;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 var(--danger-glow);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+.delete-date {
+    position: absolute;
+    bottom: 10px;
+    right: 12px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+}
+
+.card-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.vod-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex: 1;
+}
+
+.status-group {
+    margin-bottom: 14px;
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.status-row strong {
+    color: var(--text-main);
+}
+
+.progress-container {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bar-balloon {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.bar-view {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.action-btn {
+    width: 100%;
+    padding: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+/* ---------------- 빈 상태 ---------------- */
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 40vh;
+    color: var(--text-dim);
+    text-align: center;
+    animation: fadeIn 0.5s;
+}
+
+.empty-state .icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.8;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+}
+
+.empty-state h3 {
+    font-size: 20px;
+    color: var(--text-main);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+/* ---------------- 모바일 전용 요소 (PC에서는 숨김) ---------------- */
+.mobile-topbar {
+    display: none;
+}
+
+.sidebar-overlay {
+    display: none;
+}
+
+.mobile-menu-btn {
+    display: none;
+}
+
+/* ---------------- 모바일 반응형 ---------------- */
+@media (max-width: 800px) {
+    body {
+        flex-direction: column;
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .mobile-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: var(--bg-sidebar);
+        border-bottom: 1px solid var(--border-color);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+    }
+
+    .mobile-menu-btn {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+    }
+
+    .mobile-menu-btn span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: var(--text-main);
+        border-radius: 2px;
+        transition: all 0.3s;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 90;
+        backdrop-filter: blur(2px);
+    }
+
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 85%;
+        max-width: 360px;
+        height: 100vh;
+        height: 100dvh;
+        border-right: 1px solid var(--border-color);
+        z-index: 100;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar-header {
+        padding: 20px 16px;
+    }
+
+    .streamer-list {
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+        padding: 8px 10px;
+    }
+
+    .streamer-item {
+        flex-direction: row;
+        margin-right: 0;
+        margin-bottom: 4px;
+        min-width: auto;
+        text-align: left;
+        padding: 10px 12px;
+    }
+
+    .streamer-img {
+        width: 38px;
+        height: 38px;
+        margin-right: 12px;
+        margin-bottom: 0;
+    }
+
+    .main-content {
+        overflow: visible;
+    }
+
+    .top-notice {
+        padding: 10px 14px;
+        gap: 8px;
+        font-size: 12px;
+    }
+
+    .notice-badge {
+        font-size: 10px;
+        padding: 3px 7px;
+        flex-shrink: 0;
+    }
+
+    .main-header {
+        padding: 16px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        position: relative;
+    }
+
+    .main-header h2 {
+        font-size: 20px;
+    }
+
+    .header-stats {
+        font-size: 13px;
+    }
+
+    .header-controls {
+        align-items: flex-start !important;
+        width: 100%;
+    }
+
+    .tabs-container {
+        gap: 4px;
+        padding: 4px;
+        width: 100%;
+    }
+
+    .tab-btn {
+        padding: 7px 12px;
+        font-size: 13px;
+        flex: 1;
+        text-align: center;
+    }
+
+    .vod-grid {
+        padding: 12px;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .vod-card:hover {
+        transform: none;
+    }
+
+    .card-info {
+        padding: 14px;
+    }
+
+    .vod-title {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+
+    .modal-box {
+        padding: 24px 20px;
+        width: 92%;
+        max-width: none;
+        border-radius: 14px;
+    }
+
+    .custom-datepicker {
+        width: 100%;
+    }
+
+    .datepicker-container {
+        width: 100%;
+    }
+
+    .datepicker-popup {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        max-width: none;
+        z-index: 1000;
+    }
+}
+
+/* ---------------- 모달 ---------------- */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s;
+}
+
+.modal-box {
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 36px;
+    width: 90%;
+    max-width: 540px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------------- 스크롤바 사용성 및 스타일 대폭 개선 ---------------- */
+::-webkit-scrollbar,
+.main-content::-webkit-scrollbar,
+.streamer-list::-webkit-scrollbar {
+    width: 12px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track,
+.main-content::-webkit-scrollbar-track,
+.streamer-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb,
+.main-content::-webkit-scrollbar-thumb,
+.streamer-list::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover,
+.main-content::-webkit-scrollbar-thumb:hover,
+.streamer-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.35);
+    border: 2px solid transparent;
+}
+
+/* ---------------- 커스텀 데이트피커 ---------------- */
+.datepicker-container {
+    position: relative;
+    display: inline-block;
+}
+
+.custom-datepicker {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 260px;
+    padding: 10px 14px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    color: var(--text-main);
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.custom-datepicker:hover {
+    border-color: var(--accent-primary);
+}
+
+.custom-datepicker .calendar-icon {
+    font-size: 16px;
+    color: var(--text-dim);
+}
+
+.datepicker-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 300px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.datepicker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.datepicker-nav-btn {
+    background: transparent;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    color: #e2e8f0;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 11px;
+    transition: background 0.2s;
+}
+
+.datepicker-nav-btn:hover {
+    background: #334155;
+}
+
+.datepicker-selectors {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.datepicker-selectors select {
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #e2e8f0;
+    font-size: 13px;
+    padding: 4px 8px;
+    outline: none;
+    cursor: pointer;
+}
+
+.datepicker-weeks {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.datepicker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    row-gap: 6px;
+}
+
+.datepicker-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #cbd5e1;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+    border-radius: 4px;
+}
+
+.datepicker-day:hover:not(.empty):not(.active) {
+    background: #334155;
+}
+
+.datepicker-day.other-month {
+    color: #475569;
+}
+
+.datepicker-day.active {
+    background: #007aff;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.datepicker-day.active.start-date {
+    border-top-left-radius: 50%;
+    border-bottom-left-radius: 50%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.datepicker-day.active.end-date {
+    border-top-right-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.datepicker-day.in-range {
+    background: rgba(0, 122, 255, 0.2);
+    color: #ffffff;
+    border-radius: 0;
+}
+
+.datepicker-day.today {
+    border: 1px solid #007aff;
+}
+
+.datepicker-day.empty {
+    cursor: default;
+}
+
+.datepicker-footer {
+    border-top: 1px solid #334155;
+    padding-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.datepicker-apply-btn {
+    background: #007aff;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    width: 100%;
+}
+
+.datepicker-apply-btn:hover {
+    opacity: 0.9;
+}
